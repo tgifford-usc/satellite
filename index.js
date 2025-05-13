@@ -1,7 +1,8 @@
 // state variables for latitude and longitude
 let latitude = 46.4768;
 let longitude = 30.7391;
-let aspectRatio = 9 / 16;
+const latitudeReadout = document.getElementById('latitudeReadout');
+const longitudeReadout = document.getElementById('longitudeReadout');
 
 const layer_satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
     attribution: '© Esri © OpenStreetMap Contributors',
@@ -23,10 +24,10 @@ const layer_roads = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/s
     maxZoom: 20
 }).addTo(map);
   
-const layer_labels = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
-    attribution: '© Esri',
-    maxZoom: 20
-}).addTo(map);
+// const layer_labels = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
+//     attribution: '© Esri',
+//     maxZoom: 20
+// }).addTo(map);
  
 
 // when the coordinates change somehow, propagate that change everywhere
@@ -44,15 +45,17 @@ async function updateCoords(lat, lng) {
     longitude = lng;
     
     // move the map to focus on this
-    let currentMapZoom = map.getZoom();
-    let newMapZoom = Math.max(currentMapZoom, 4);
-    map.setView([latitude, longitude], newMapZoom);
+    // let currentMapZoom = map.getZoom();
+    // let newMapZoom = Math.max(currentMapZoom, 4);
+    // map.setView([latitude, longitude], newMapZoom);
 }
 
 
 // or enter coords by clicking on map
 async function onMapClick(e) {
     updateCoords(e.latlng.lat, e.latlng.lng);
+    latitudeReadout.innerText = `latitude: ${latitude.toFixed(5)}`;
+    longitudeReadout.innerText = `longitude: ${longitude.toFixed(5)}`; 
 }
 
 map.on('click', onMapClick);
@@ -98,8 +101,43 @@ const paddedBounds = L.latLngBounds(
   );
 
 
-let markers = poi.map((x) => { return L.marker(x).addTo(map)} );
+let markers = poi.map((x) => { return( 
+    // L.circle(x, {
+    //     color: 'blue',
+    //     fillColor: 'blue',
+    //     fillOpacity: 1.0,
+    //     radius: 50
+    // }).addTo(map));
+    L.marker(x).addTo(map))
+});
 
 map.fitBounds(paddedBounds);
 
 const boundingBox = L.rectangle(paddedBounds, {color: "#ff7800", weight: 1}).addTo(map);
+
+
+function exportMap() {
+    leafletImage(map, function(err, canvas) {
+      // Export PNG
+      const imageURL = canvas.toDataURL();
+      const link = document.createElement('a');
+      link.href = imageURL;
+      link.download = 'map.png';
+      link.click();
+
+      // Get pixel positions
+      const csvRows = [["Name", "Pixel X", "Pixel Y"]];
+      poi.forEach(p => {
+        const point = map.latLngToContainerPoint([p[0], p[1]]);
+        csvRows.push([p.name, Math.round(point.x), Math.round(point.y)]);
+      });
+
+      // Create and download CSV
+      const csvContent = csvRows.map(e => e.join(",")).join("\n");
+      const csvBlob = new Blob([csvContent], { type: 'text/csv' });
+      const csvLink = document.createElement('a');
+      csvLink.href = URL.createObjectURL(csvBlob);
+      csvLink.download = "points.csv";
+      csvLink.click();
+    });
+  }
