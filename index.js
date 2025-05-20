@@ -15,7 +15,8 @@ const layer_satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest
 const map = L.map('map', {
     center: [latitude, longitude],
     zoom: 13,
-    layers: [layer_satellite]
+    layers: [layer_satellite],
+    preferCanvas: true,
 });
 
 
@@ -62,12 +63,12 @@ map.on('click', onMapClick);
 
 
 const poi = [
-    [46.368591420397856, 30.725943268124652],
+    // [46.368591420397856, 30.725943268124652],
     [46.413639637781955, 30.72509083929136],
     [46.38394556346204, 30.749418743332836],
-    [46.56396430861289, 30.836155494582947],
-    [46.46085483538552, 30.75109534854745],
-    [46.460254411308284, 30.749712615923364],
+    // [46.56396430861289, 30.836155494582947],
+    // [46.46085483538552, 30.75109534854745],
+    // [46.460254411308284, 30.749712615923364],
     [46.459788250336054, 30.749719452248932],
     [46.48532007145473, 30.74444526581465],
     [46.48501683554047, 30.74473462483897],
@@ -77,10 +78,10 @@ const poi = [
     [46.49109185402058, 30.7465874293984],
     [46.493473338516765, 30.728845646022588],
     [46.473434948329555, 30.711918896279848],
-    [46.593168088481924, 30.80264380157496],
+    // [46.593168088481924, 30.80264380157496],
     [46.41708538039061, 30.76278342696602],
     [46.481345675669104, 30.743576638091017],
-    [46.48082852884869, 30.74369465527158]
+    // [46.48082852884869, 30.74369465527158]
 ];
 
 const lats = poi.map(p => p[0]);
@@ -102,18 +103,18 @@ const paddedBounds = L.latLngBounds(
 
 
 let markers = poi.map((x) => { return( 
-    // L.circle(x, {
-    //     color: 'blue',
-    //     fillColor: 'blue',
-    //     fillOpacity: 1.0,
-    //     radius: 50
-    // }).addTo(map));
-    L.marker(x).addTo(map))
+    L.circle(x, {
+        color: 'blue',
+        fillColor: 'blue',
+        fillOpacity: 1.0,
+        radius: 50
+    }).addTo(map));
+    // L.marker(x).addTo(map))
 });
 
 map.fitBounds(paddedBounds);
 
-const boundingBox = L.rectangle(paddedBounds, {color: "#ff7800", weight: 1}).addTo(map);
+// const boundingBox = L.rectangle(paddedBounds, {color: "#ff7800", weight: 1}).addTo(map);
 
 
 function exportMap() {
